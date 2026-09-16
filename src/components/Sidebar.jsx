@@ -17,14 +17,14 @@ import {
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }) {
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, badge: 'Active' },
-    { name: 'Courses', path: '/courses', icon: BookOpen, badge: 'Mod 3' },
-    { name: 'Students', path: '/students', icon: Users, badge: 'Mod 4' },
-    { name: 'Instructors', path: '/instructors', icon: UserCheck, badge: 'Mod 6' },
-    { name: 'Enrollments', path: '/enrollments', icon: GraduationCap, badge: 'Mod 5' },
-    { name: 'Learning Progress', path: '/progress', icon: TrendingUp, badge: 'Mod 7' },
-    { name: 'Assignments', path: '/assignments', icon: FileText, badge: 'Mod 8' },
-    { name: 'Reports & Analytics', path: '/reports', icon: BarChart3, badge: 'Mod 9' },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Courses', path: '/courses', icon: BookOpen },
+    { name: 'Students', path: '/students', icon: Users },
+    { name: 'Instructors', path: '/instructors', icon: UserCheck },
+    { name: 'Enrollments', path: '/enrollments', icon: GraduationCap },
+    { name: 'Learning Progress', path: '/progress', icon: TrendingUp },
+    { name: 'Assignments', path: '/assignments', icon: FileText },
+    { name: 'Reports & Analytics', path: '/reports', icon: BarChart3 },
   ];
 
   return (
@@ -37,26 +37,26 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
         />
       )}
 
-      {/* Sidebar Drawer Container */}
-      <aside className={`fixed lg:static top-0 left-0 z-50 h-screen teal-glass-panel border-r border-emerald-500/20 flex flex-col transition-all duration-300 ${
+      {/* Sticky/Fixed Height Sidebar */}
+      <aside className={`fixed lg:sticky top-0 left-0 z-40 h-screen teal-glass-panel border-r border-emerald-500/20 flex flex-col shrink-0 transition-all duration-300 ${
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'} w-64`}>
         
         {/* Sidebar Header */}
-        <div className="h-18 px-4 flex items-center justify-between border-b border-emerald-500/20">
+        <div className="h-18 px-4 flex items-center justify-between border-b border-emerald-500/20 shrink-0">
           <div className={`flex items-center space-x-3 overflow-hidden ${isCollapsed ? 'lg:justify-center lg:w-full' : ''}`}>
-            <div className="w-9 h-9 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-xl flex items-center justify-center text-slate-950 font-black shadow-md">
+            <div className="w-9 h-9 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-xl flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
               <Shield className="w-5 h-5" />
             </div>
             {!isCollapsed && (
-              <div>
-                <span className="text-base font-black text-white tracking-tight">Admin Console</span>
+              <div className="truncate">
+                <span className="text-base font-black text-white tracking-tight block truncate">Admin Console</span>
                 <span className="text-[10px] block text-emerald-400 font-bold uppercase tracking-widest">LMS Portal</span>
               </div>
             )}
           </div>
 
-          {/* Close button for Mobile */}
+          {/* Mobile Close */}
           <button 
             onClick={() => setIsOpen(false)}
             className="lg:hidden text-emerald-300 hover:text-white p-1 rounded-lg"
@@ -65,7 +65,7 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
           </button>
         </div>
 
-        {/* Navigation Items List */}
+        {/* Nav Links */}
         <nav className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -74,23 +74,16 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsOpen(false)}
-                className={({ isActive }) => `flex items-center justify-between px-3.5 py-3 rounded-xl font-bold text-xs transition-all duration-200 ${
+                className={({ isActive }) => `flex items-center space-x-3 px-3.5 py-3 rounded-xl font-bold text-xs transition-all duration-200 ${
                   isActive
                     ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/10'
                     : 'text-emerald-200/60 hover:text-white hover:bg-emerald-500/10 hover:border-emerald-500/20 border border-transparent'
                 }`}
                 title={isCollapsed ? item.name : undefined}
               >
-                <div className="flex items-center space-x-3 min-w-0">
-                  <Icon className="w-5 h-5 shrink-0 text-emerald-400" />
-                  {!isCollapsed && (
-                    <span className="truncate tracking-wide">{item.name}</span>
-                  )}
-                </div>
+                <Icon className="w-5 h-5 shrink-0 text-emerald-400" />
                 {!isCollapsed && (
-                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#04121b] text-emerald-400 border border-emerald-500/30">
-                    {item.badge}
-                  </span>
+                  <span className="truncate tracking-wide">{item.name}</span>
                 )}
               </NavLink>
             );
@@ -98,10 +91,10 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
         </nav>
 
         {/* Desktop Collapse Toggle Footer */}
-        <div className="hidden lg:flex p-3 border-t border-emerald-500/20">
+        <div className="hidden lg:flex p-3 border-t border-emerald-500/20 shrink-0">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-full flex items-center justify-center p-2.5 rounded-xl bg-[#04121b] hover:bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 transition-all text-xs font-bold gap-2"
+            className="w-full flex items-center justify-center p-2.5 rounded-xl bg-[#04121b] hover:bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 transition-all text-xs font-bold gap-2 cursor-pointer"
           >
             {isCollapsed ? (
               <ChevronRight className="w-5 h-5" />
