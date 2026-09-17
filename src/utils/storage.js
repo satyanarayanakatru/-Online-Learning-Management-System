@@ -2,15 +2,23 @@
 const USERS_KEY = 'lms_users';
 const CURRENT_USER_KEY = 'lms_current_user';
 
-// Pre-seeded Admin demo account
+// Pre-seeded Admin and Student demo accounts
 const DEFAULT_USERS = [
   {
     id: 'usr-admin-1',
-    name: 'Admin Instructor',
+    name: 'Admin Director',
     email: 'admin@lms.com',
     password: 'password123',
     role: 'Admin',
     createdAt: '2026-01-15T08:30:00.000Z'
+  },
+  {
+    id: 'usr-student-1',
+    name: 'Alex Johnson',
+    email: 'student@lms.com',
+    password: 'password123',
+    role: 'Student',
+    createdAt: '2026-01-20T10:15:00.000Z'
   }
 ];
 

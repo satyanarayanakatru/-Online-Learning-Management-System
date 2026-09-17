@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCourses } from '../context/CourseContext';
 import { useStudents } from '../context/StudentContext';
+import { useEnrollments } from '../context/EnrollmentContext';
 import Sidebar from '../components/Sidebar';
 import StatCard from '../components/StatCard';
 import QuickActionCards from '../components/QuickActionCards';
@@ -22,19 +23,23 @@ import {
   GraduationCap, 
   Menu, 
   Sparkles, 
-  Layers
+  Layers,
+  ArrowRight,
+  ShieldCheck
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { courses, loading: coursesLoading, addCourse } = useCourses();
   const { students, loading: studentsLoading, addStudent } = useStudents();
+  const { enrollments, loading: enrollmentsLoading } = useEnrollments();
   
   // Layout state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Mock static stats for instructors (to be bound to Instructor context in Module 6)
+  // Mock static stats for instructors (to be bound in Module 6)
   const [stats, setStats] = useState(INITIAL_DASHBOARD_STATS);
   const [upcomingClasses] = useState(INITIAL_UPCOMING_CLASSES);
   const [recentActivities, setRecentActivities] = useState(INITIAL_RECENT_ACTIVITIES);
@@ -81,7 +86,7 @@ export default function Dashboard() {
     setRecentActivities([newAct, ...recentActivities]);
   };
 
-  const isLoading = coursesLoading || studentsLoading;
+  const isLoading = coursesLoading || studentsLoading || enrollmentsLoading;
 
   return (
     <div className="min-h-screen bg-[#061923] flex text-[#f0fdf4]">
@@ -111,7 +116,7 @@ export default function Dashboard() {
                 Admin Dashboard Overview
               </h1>
               <p className="text-xs text-emerald-200/60 font-semibold hidden sm:block">
-                Real-time LMS metrics, dynamic Course & Student Contexts, live classes & activity stream
+                Real-time LMS metrics, dynamic Course, Student & Enrollment Contexts
               </p>
             </div>
           </div>
@@ -132,7 +137,49 @@ export default function Dashboard() {
           ) : (
             <div className="max-w-7xl mx-auto space-y-8">
               
-              {/* 1. Dynamic Stats Grid */}
+              {/* 1. Enhanced High-Res Image Hero Welcome Banner */}
+              <div className="relative overflow-hidden rounded-3xl border border-emerald-500/30 shadow-2xl group min-h-[220px]">
+                {/* Hero Image */}
+                <img 
+                  src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&q=80" 
+                  alt="LMS Education Dashboard" 
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                />
+                {/* Gradient Blur Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#061923] via-[#061923]/90 to-[#061923]/70" />
+
+                {/* Hero Content Overlay */}
+                <div className="relative z-10 p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="space-y-3">
+                    <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-extrabold px-3.5 py-1 rounded-full shadow-lg backdrop-blur-md">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Admin Control Panel v2.0 Active</span>
+                    </div>
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+                      Welcome back, <span className="gradient-mint-text">{user?.name}</span>
+                    </h1>
+                    <p className="text-emerald-100/90 text-xs sm:text-sm max-w-2xl leading-relaxed font-semibold">
+                      You have full administrator access to course curricula, student directory, registrations, and learning analytics.
+                    </p>
+                  </div>
+
+                  {/* Admin Session Badge */}
+                  <div className="teal-glass-card p-4 rounded-2xl border border-emerald-500/40 flex items-center space-x-3.5 min-w-[220px] backdrop-blur-md">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 flex items-center justify-center font-black text-xl shadow-lg">
+                      {user?.name?.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-emerald-300/70 font-bold uppercase tracking-wider">Admin ID</p>
+                      <p className="text-xs font-mono text-emerald-300 font-semibold">{user?.id}</p>
+                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold mt-0.5">
+                        ✓ Active Session
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Dynamic Stats Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <StatCard 
                   title="Total Courses" 
@@ -157,17 +204,17 @@ export default function Dashboard() {
                 />
                 <StatCard 
                   title="Active Enrollments" 
-                  value={stats.activeEnrollments} 
+                  value={enrollments.length} 
                   growth={stats.enrollmentGrowth}
                   icon={GraduationCap}
-                  subtext="Course registrations"
+                  subtext="Live Global Enrollment Context"
                 />
               </div>
 
-              {/* 2. Quick Action Control Panel */}
+              {/* 3. Quick Action Control Panel */}
               <QuickActionCards onOpenModal={(action) => setActiveModalAction(action)} />
 
-              {/* 3. Real-Time Courses Progress Grid from CourseContext */}
+              {/* 4. Real-Time Courses Progress Grid from CourseContext */}
               <div className="teal-glass-card p-6 rounded-3xl space-y-5">
                 <div className="flex items-center justify-between border-b border-emerald-500/20 pb-4">
                   <div className="flex items-center space-x-3 text-emerald-400">
@@ -179,9 +226,13 @@ export default function Dashboard() {
                       <p className="text-[11px] text-emerald-200/60 font-semibold">Live courses synced via global CourseContext</p>
                     </div>
                   </div>
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-black px-2.5 py-1 rounded-full border border-emerald-500/30">
-                    {courses.length} Global Courses
-                  </span>
+                  <Link 
+                    to="/courses"
+                    className="text-xs font-bold text-emerald-400 hover:text-amber-400 flex items-center gap-1 transition"
+                  >
+                    <span>View All Courses</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
 
                 {courses.length === 0 ? (
@@ -232,7 +283,7 @@ export default function Dashboard() {
                 )}
               </div>
 
-              {/* 4. Upcoming Classes & Recent Activity Stream */}
+              {/* 5. Upcoming Classes & Recent Activity Stream */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <UpcomingClasses classes={upcomingClasses} />
                 <RecentActivities activities={recentActivities} />

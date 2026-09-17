@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     return sessionUser;
   };
 
-  const register = ({ name, email, password }) => {
+  const register = ({ name, email, password, role = 'Admin' }) => {
     const users = getStoredUsers();
     const existing = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
 
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       name,
       email,
       password,
-      role: 'Admin',
+      role: role || 'Admin',
       createdAt: new Date().toISOString()
     };
 
