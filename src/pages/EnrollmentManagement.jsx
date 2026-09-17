@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useEnrollments } from '../context/EnrollmentContext';
+import { useStudents } from '../context/StudentContext';
+import { useCourses } from '../context/CourseContext';
 import Sidebar from '../components/Sidebar';
 import EnrollmentFormModal from '../components/EnrollmentFormModal';
 import RemoveEnrollmentConfirmModal from '../components/RemoveEnrollmentConfirmModal';
@@ -24,6 +26,24 @@ import {
 export default function EnrollmentManagement() {
   const { user } = useAuth();
   const { enrollments, loading, removeEnrollment } = useEnrollments();
+  const { students } = useStudents();
+  const { courses } = useCourses();
+
+  // Dynamically resolve real-time student details & course info
+  const resolvedEnrollments = useMemo(() => {
+    return enrollments.map((enr) => {
+      const matchedStudent = students.find((s) => s.id === enr.studentId);
+      const matchedCourse = courses.find((c) => c.id === enr.courseId);
+      return {
+        ...enr,
+        studentName: matchedStudent ? matchedStudent.fullName : enr.studentName,
+        studentEmail: matchedStudent ? matchedStudent.email : enr.studentEmail,
+        courseTitle: matchedCourse ? matchedCourse.title : enr.courseTitle,
+        category: matchedCourse ? matchedCourse.category : enr.category,
+        instructor: matchedCourse ? matchedCourse.instructor : enr.instructor
+      };
+    });
+  }, [enrollments, students, courses]);
 
   // Layout state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -44,17 +64,17 @@ export default function EnrollmentManagement() {
 
   // Enrollment Summary Metrics
   const metrics = useMemo(() => {
-    const totalCount = enrollments.length;
-    const uniqueStudents = new Set(enrollments.map((e) => e.studentId)).size;
-    const uniqueCourses = new Set(enrollments.map((e) => e.courseId)).size;
-    const totalRevenue = enrollments.reduce((sum, e) => sum + Number(e.price || 0), 0);
+    const totalCount = resolvedEnrollments.length;
+    const uniqueStudents = new Set(resolvedEnrollments.map((e) => e.studentId)).size;
+    const uniqueCourses = new Set(resolvedEnrollments.map((e) => e.courseId)).size;
+    const totalRevenue = resolvedEnrollments.reduce((sum, e) => sum + Number(e.price || 0), 0);
 
     return { totalCount, uniqueStudents, uniqueCourses, totalRevenue };
-  }, [enrollments]);
+  }, [resolvedEnrollments]);
 
   // Filter & Sort Logic
   const filteredAndSortedEnrollments = useMemo(() => {
-    return enrollments
+    return resolvedEnrollments
       .filter((e) => {
         const matchesSearch = 
           e.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -70,7 +90,7 @@ export default function EnrollmentManagement() {
         if (sortBy === 'fee-low') return Number(a.price) - Number(b.price);
         return 0;
       });
-  }, [enrollments, searchQuery, selectedCategory, sortBy]);
+  }, [resolvedEnrollments, searchQuery, selectedCategory, sortBy]);
 
   // Pagination Slice
   const totalPages = Math.ceil(filteredAndSortedEnrollments.length / itemsPerPage) || 1;

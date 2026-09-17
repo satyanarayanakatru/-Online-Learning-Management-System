@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStudents } from '../context/StudentContext';
 import { useCourses } from '../context/CourseContext';
 import { useEnrollments } from '../context/EnrollmentContext';
+import { useProgress } from '../context/ProgressContext';
 import { X, GraduationCap, BookOpen, User, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -9,6 +10,7 @@ export default function EnrollmentFormModal({ isOpen, onClose, onEnrollSuccess }
   const { students } = useStudents();
   const { courses } = useCourses();
   const { enrollStudent, isStudentEnrolled } = useEnrollments();
+  const { createProgressRecord } = useProgress();
 
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedCourseId, setSelectedCourseId] = useState('');
@@ -63,6 +65,9 @@ export default function EnrollmentFormModal({ isOpen, onClose, onEnrollSuccess }
         price: selectedCourse.price,
         enrollmentDate: enrollmentDate
       });
+      // Automatically sync learning progress record in real time
+      createProgressRecord(selectedStudent.id, selectedStudent.fullName, selectedCourse.id, selectedCourse.title, 15);
+
       if (onEnrollSuccess) onEnrollSuccess();
       onClose();
     } catch (err) {

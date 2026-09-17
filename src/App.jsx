@@ -5,6 +5,7 @@ import { CourseProvider } from './context/CourseContext';
 import { StudentProvider } from './context/StudentContext';
 import { EnrollmentProvider } from './context/EnrollmentContext';
 import { InstructorProvider } from './context/InstructorContext';
+import { ProgressProvider } from './context/ProgressContext';
 import { ToastContainer } from 'react-toastify';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -27,7 +28,8 @@ export default function App() {
         <StudentProvider>
           <EnrollmentProvider>
             <InstructorProvider>
-              <BrowserRouter>
+              <ProgressProvider>
+                <BrowserRouter>
               <div className="min-h-screen bg-[#061923] flex flex-col font-sans">
                 <Navbar />
                 <main className="flex-1 flex flex-col">
@@ -123,7 +125,8 @@ export default function App() {
                 />
               </div>
             </BrowserRouter>
-          </InstructorProvider>
+          </ProgressProvider>
+        </InstructorProvider>
         </EnrollmentProvider>
         </StudentProvider>
       </CourseProvider>

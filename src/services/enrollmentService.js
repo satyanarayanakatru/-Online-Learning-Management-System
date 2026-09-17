@@ -1,11 +1,12 @@
 const STORAGE_KEY = 'lms_enrollments';
 
+// Initial default enrollments linked directly to DummyJSON student IDs & courses
 const INITIAL_ENROLLMENTS = [
   {
     id: 'enr-101',
     studentId: 'std-api-1',
-    studentName: 'Emily Johnson',
-    studentEmail: 'emily.johnson@x.dummyjson.com',
+    studentName: 'Terry Medhurst',
+    studentEmail: 'atyler@qq.com',
     courseId: 'crs-1',
     courseTitle: 'React 19 & Next.js 15 Masterclass',
     category: 'Web Development',
@@ -17,8 +18,8 @@ const INITIAL_ENROLLMENTS = [
   {
     id: 'enr-102',
     studentId: 'std-api-2',
-    studentName: 'Michael Williams',
-    studentEmail: 'michael.williams@x.dummyjson.com',
+    studentName: 'Sheldon Quigley',
+    studentEmail: 'hbingley1@51.la',
     courseId: 'crs-2',
     courseTitle: 'Tailwind CSS v4 & Advanced Design Systems',
     category: 'UI/UX Design',
@@ -30,14 +31,27 @@ const INITIAL_ENROLLMENTS = [
   {
     id: 'enr-103',
     studentId: 'std-api-3',
-    studentName: 'Sophia Brown',
-    studentEmail: 'sophia.brown@x.dummyjson.com',
+    studentName: 'Terrill Hills',
+    studentEmail: 'rshawe2@51.la',
     courseId: 'crs-3',
     courseTitle: 'Full-Stack Node.js & Microservices API',
     category: 'Backend Architecture',
     instructor: 'Prof. Michael Chen',
     price: 79.99,
     enrollmentDate: '2026-02-25',
+    status: 'Active'
+  },
+  {
+    id: 'enr-104',
+    studentId: 'std-api-4',
+    studentName: 'Miles Cummerata',
+    studentEmail: 'yraig3@163.com',
+    courseId: 'crs-4',
+    courseTitle: 'Python Data Science & Machine Learning Toolkit',
+    category: 'Data Science',
+    instructor: 'Dr. Elena Rostova',
+    price: 89.99,
+    enrollmentDate: '2026-03-01',
     status: 'Active'
   }
 ];
