@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCourses } from '../context/CourseContext';
+import { useStudents } from '../context/StudentContext';
 import Sidebar from '../components/Sidebar';
 import StatCard from '../components/StatCard';
 import QuickActionCards from '../components/QuickActionCards';
@@ -27,12 +28,13 @@ import {
 export default function Dashboard() {
   const { user } = useAuth();
   const { courses, loading: coursesLoading, addCourse } = useCourses();
+  const { students, loading: studentsLoading, addStudent } = useStudents();
   
   // Layout state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  // Mock static stats for students/instructors (to be bound to Student/Instructor contexts in Module 4 & 6)
+  // Mock static stats for instructors (to be bound to Instructor context in Module 6)
   const [stats, setStats] = useState(INITIAL_DASHBOARD_STATS);
   const [upcomingClasses] = useState(INITIAL_UPCOMING_CLASSES);
   const [recentActivities, setRecentActivities] = useState(INITIAL_RECENT_ACTIVITIES);
@@ -53,8 +55,15 @@ export default function Dashboard() {
         rating: 4.9,
         thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80'
       });
-    } else if (actionId === 'register-student') {
-      setStats(prev => ({ ...prev, totalStudents: prev.totalStudents + 1 }));
+    } else if (actionId === 'register-student' && data.name) {
+      addStudent({
+        fullName: data.name,
+        email: data.email || 'student@example.com',
+        mobile: '+1 555-0100',
+        address: 'Main Campus, LMS Portal',
+        qualification: "Bachelor's Degree",
+        enrollmentDate: new Date().toISOString().split('T')[0]
+      });
     } else if (actionId === 'add-instructor') {
       setStats(prev => ({ ...prev, totalInstructors: prev.totalInstructors + 1 }));
     }
@@ -71,6 +80,8 @@ export default function Dashboard() {
     };
     setRecentActivities([newAct, ...recentActivities]);
   };
+
+  const isLoading = coursesLoading || studentsLoading;
 
   return (
     <div className="min-h-screen bg-[#061923] flex text-[#f0fdf4]">
@@ -100,7 +111,7 @@ export default function Dashboard() {
                 Admin Dashboard Overview
               </h1>
               <p className="text-xs text-emerald-200/60 font-semibold hidden sm:block">
-                Real-time LMS metrics, dynamic Course Context, live classes & activity stream
+                Real-time LMS metrics, dynamic Course & Student Contexts, live classes & activity stream
               </p>
             </div>
           </div>
@@ -116,7 +127,7 @@ export default function Dashboard() {
         {/* Dashboard Main Content Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
           
-          {coursesLoading ? (
+          {isLoading ? (
             <SkeletonLoader />
           ) : (
             <div className="max-w-7xl mx-auto space-y-8">
@@ -132,10 +143,10 @@ export default function Dashboard() {
                 />
                 <StatCard 
                   title="Total Students" 
-                  value={stats.totalStudents} 
+                  value={students.length} 
                   growth={stats.studentGrowth}
                   icon={Users}
-                  subtext="Registered active learners"
+                  subtext="Live Global Student Context"
                 />
                 <StatCard 
                   title="Total Instructors" 
