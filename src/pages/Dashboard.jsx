@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCourses } from '../context/CourseContext';
 import { useStudents } from '../context/StudentContext';
 import { useEnrollments } from '../context/EnrollmentContext';
+import { useInstructors } from '../context/InstructorContext';
 import Sidebar from '../components/Sidebar';
 import StatCard from '../components/StatCard';
 import QuickActionCards from '../components/QuickActionCards';
@@ -34,6 +35,7 @@ export default function Dashboard() {
   const { courses, loading: coursesLoading, addCourse } = useCourses();
   const { students, loading: studentsLoading, addStudent } = useStudents();
   const { enrollments, loading: enrollmentsLoading } = useEnrollments();
+  const { instructors, loading: instructorsLoading } = useInstructors();
   
   // Layout state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -86,7 +88,7 @@ export default function Dashboard() {
     setRecentActivities([newAct, ...recentActivities]);
   };
 
-  const isLoading = coursesLoading || studentsLoading || enrollmentsLoading;
+  const isLoading = coursesLoading || studentsLoading || enrollmentsLoading || instructorsLoading;
 
   return (
     <div className="min-h-screen bg-[#061923] flex text-[#f0fdf4]">
@@ -197,10 +199,10 @@ export default function Dashboard() {
                 />
                 <StatCard 
                   title="Total Instructors" 
-                  value={stats.totalInstructors} 
+                  value={instructors.length} 
                   growth={stats.instructorGrowth}
                   icon={UserCheck}
-                  subtext="Faculty members"
+                  subtext="Live Global Instructor Context"
                 />
                 <StatCard 
                   title="Active Enrollments" 
