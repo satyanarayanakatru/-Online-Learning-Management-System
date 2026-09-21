@@ -5,6 +5,7 @@ import {
   Star, Mail, Phone, BookOpen, Award, Edit3, Trash2, 
   Eye, CheckCircle2, UserPlus, RefreshCw, UserX 
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { useInstructors } from '../context/InstructorContext';
 import { useCourses } from '../context/CourseContext';
 import InstructorFormModal from '../components/instructors/InstructorFormModal';
@@ -26,6 +27,9 @@ const SPECIALIZATIONS = [
 ];
 
 export default function InstructorManagement() {
+  const { user } = useAuth();
+  const isStudent = user?.role?.toLowerCase() === 'student';
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
@@ -113,9 +117,13 @@ export default function InstructorManagement() {
               <Menu className="w-6 h-6" />
             </button>
             <div>
-              <h1 className="text-xl font-black text-white tracking-tight">Instructor Management</h1>
+              <h1 className="text-xl font-black text-white tracking-tight">
+                {isStudent ? 'Faculty Instructors Directory' : 'Instructor Management'}
+              </h1>
               <p className="text-xs text-emerald-200/60 font-semibold hidden sm:block">
-                Module 6: Faculty Records, Profiles, Specializations & Course Assignments
+                {isStudent
+                  ? 'Module 6: View faculty profiles, specializations & courses taught'
+                  : 'Module 6: Faculty Records, Profiles, Specializations & Course Assignments'}
               </p>
             </div>
           </div>
@@ -129,13 +137,15 @@ export default function InstructorManagement() {
               <RefreshCw className="w-4 h-4" />
             </button>
 
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="emerald-btn px-4 py-2.5 rounded-xl text-xs font-black shadow-lg flex items-center space-x-2 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Add Instructor</span>
-            </button>
+            {!isStudent && (
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="emerald-btn px-4 py-2.5 rounded-xl text-xs font-black shadow-lg flex items-center space-x-2 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Add Instructor</span>
+              </button>
+            )}
           </div>
         </header>
 
@@ -323,39 +333,51 @@ export default function InstructorManagement() {
                     </div>
 
                     {/* Actions */}
-                    <div className="grid grid-cols-4 gap-2 pt-2 border-t border-emerald-500/20">
-                      <button
-                        onClick={() => setSelectedInstructorForDetails(instructor)}
-                        className="py-2 px-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
-                        title="View Profile"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
+                    {isStudent ? (
+                      <div className="pt-2 border-t border-emerald-500/20">
+                        <button
+                          onClick={() => setSelectedInstructorForDetails(instructor)}
+                          className="w-full py-2 px-3 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>View Faculty Profile</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-2 pt-2 border-t border-emerald-500/20">
+                        <button
+                          onClick={() => setSelectedInstructorForDetails(instructor)}
+                          className="py-2 px-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                          title="View Profile"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
 
-                      <button
-                        onClick={() => setSelectedInstructorForAssign(instructor)}
-                        className="py-2 px-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
-                        title="Assign Courses"
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                      </button>
+                        <button
+                          onClick={() => setSelectedInstructorForAssign(instructor)}
+                          className="py-2 px-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                          title="Assign Courses"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                        </button>
 
-                      <button
-                        onClick={() => setSelectedInstructorForEdit(instructor)}
-                        className="py-2 px-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
-                        title="Edit Instructor"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
+                        <button
+                          onClick={() => setSelectedInstructorForEdit(instructor)}
+                          className="py-2 px-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                          title="Edit Instructor"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
 
-                      <button
-                        onClick={() => setSelectedInstructorForDelete(instructor)}
-                        className="py-2 px-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
-                        title="Delete Instructor"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => setSelectedInstructorForDelete(instructor)}
+                          className="py-2 px-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 transition text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                          title="Delete Instructor"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
 
                   </div>
                 );
@@ -408,36 +430,45 @@ export default function InstructorManagement() {
                           </span>
                         </td>
                         <td className="p-4 text-center">
-                          <div className="flex items-center justify-center space-x-2">
+                          {isStudent ? (
                             <button
                               onClick={() => setSelectedInstructorForDetails(instructor)}
-                              className="p-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 transition cursor-pointer"
-                              title="View Profile"
+                              className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-bold text-xs cursor-pointer"
                             >
-                              <Eye className="w-4 h-4" />
+                              View Profile
                             </button>
-                            <button
-                              onClick={() => setSelectedInstructorForAssign(instructor)}
-                              className="p-2 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 transition cursor-pointer"
-                              title="Assign Courses"
-                            >
-                              <BookOpen className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setSelectedInstructorForEdit(instructor)}
-                              className="p-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 transition cursor-pointer"
-                              title="Edit Instructor"
-                            >
-                              <Edit3 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setSelectedInstructorForDelete(instructor)}
-                              className="p-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 transition cursor-pointer"
-                              title="Delete Instructor"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                          ) : (
+                            <div className="flex items-center justify-center space-x-2">
+                              <button
+                                onClick={() => setSelectedInstructorForDetails(instructor)}
+                                className="p-2 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 transition cursor-pointer"
+                                title="View Profile"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setSelectedInstructorForAssign(instructor)}
+                                className="p-2 rounded-lg bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 transition cursor-pointer"
+                                title="Assign Courses"
+                              >
+                                <BookOpen className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setSelectedInstructorForEdit(instructor)}
+                                className="p-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 transition cursor-pointer"
+                                title="Edit Instructor"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setSelectedInstructorForDelete(instructor)}
+                                className="p-2 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 transition cursor-pointer"
+                                title="Delete Instructor"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -451,37 +482,41 @@ export default function InstructorManagement() {
       </div>
 
       {/* Modals */}
-      <InstructorFormModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handleAddSubmit}
-      />
+      {!isStudent && (
+        <>
+          <InstructorFormModal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            onSubmit={handleAddSubmit}
+          />
 
-      <InstructorFormModal
-        isOpen={!!selectedInstructorForEdit}
-        onClose={() => setSelectedInstructorForEdit(null)}
-        onSubmit={handleEditSubmit}
-        initialData={selectedInstructorForEdit}
-      />
+          <InstructorFormModal
+            isOpen={!!selectedInstructorForEdit}
+            onClose={() => setSelectedInstructorForEdit(null)}
+            onSubmit={handleEditSubmit}
+            initialData={selectedInstructorForEdit}
+          />
+
+          <AssignCourseModal
+            isOpen={!!selectedInstructorForAssign}
+            onClose={() => setSelectedInstructorForAssign(null)}
+            instructor={selectedInstructorForAssign}
+            onAssignCourse={assignCourse}
+          />
+
+          <DeleteInstructorConfirmModal
+            isOpen={!!selectedInstructorForDelete}
+            onClose={() => setSelectedInstructorForDelete(null)}
+            onConfirm={handleDeleteConfirm}
+            instructor={selectedInstructorForDelete}
+          />
+        </>
+      )}
 
       <InstructorDetailsModal
         isOpen={!!selectedInstructorForDetails}
         onClose={() => setSelectedInstructorForDetails(null)}
         instructor={selectedInstructorForDetails}
-      />
-
-      <AssignCourseModal
-        isOpen={!!selectedInstructorForAssign}
-        onClose={() => setSelectedInstructorForAssign(null)}
-        instructor={selectedInstructorForAssign}
-        onAssignCourse={assignCourse}
-      />
-
-      <DeleteInstructorConfirmModal
-        isOpen={!!selectedInstructorForDelete}
-        onClose={() => setSelectedInstructorForDelete(null)}
-        onConfirm={handleDeleteConfirm}
-        instructor={selectedInstructorForDelete}
       />
 
     </div>

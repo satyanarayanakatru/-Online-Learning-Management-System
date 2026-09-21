@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -16,16 +17,30 @@ import {
 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed }) {
-  const navItems = [
+  const { user } = useAuth();
+  const isStudent = user?.role?.toLowerCase() === 'student';
+
+  const adminNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Courses', path: '/courses', icon: BookOpen },
     { name: 'Students', path: '/students', icon: Users },
     { name: 'Instructors', path: '/instructors', icon: UserCheck },
     { name: 'Enrollments', path: '/enrollments', icon: GraduationCap },
     { name: 'Learning Progress', path: '/progress', icon: TrendingUp },
-    { name: 'Assignments', path: '/assignments', icon: FileText },
+    { name: 'Assignments & Quizzes', path: '/assignments', icon: FileText },
     { name: 'Reports & Analytics', path: '/reports', icon: BarChart3 },
   ];
+
+  const studentNavItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Browse Courses', path: '/courses', icon: BookOpen },
+    { name: 'My Enrolled Courses', path: '/enrollments', icon: GraduationCap },
+    { name: 'Faculty Instructors', path: '/instructors', icon: UserCheck },
+    { name: 'My Learning Progress', path: '/progress', icon: TrendingUp },
+    { name: 'Assignments & Quizzes', path: '/assignments', icon: FileText },
+  ];
+
+  const navItems = isStudent ? studentNavItems : adminNavItems;
 
   return (
     <>
@@ -45,13 +60,21 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed, setIsCollapsed
         {/* Sidebar Header */}
         <div className="h-18 px-4 flex items-center justify-between border-b border-emerald-500/20 shrink-0">
           <div className={`flex items-center space-x-3 overflow-hidden ${isCollapsed ? 'lg:justify-center lg:w-full' : ''}`}>
-            <div className="w-9 h-9 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-xl flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
-              <Shield className="w-5 h-5" />
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black shadow-md shrink-0 ${
+              isStudent 
+                ? 'bg-gradient-to-tr from-teal-500 to-cyan-400 text-slate-950' 
+                : 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950'
+            }`}>
+              {isStudent ? <GraduationCap className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
             </div>
             {!isCollapsed && (
               <div className="truncate">
-                <span className="text-base font-black text-white tracking-tight block truncate">Admin Console</span>
-                <span className="text-[10px] block text-emerald-400 font-bold uppercase tracking-widest">LMS Portal</span>
+                <span className="text-base font-black text-white tracking-tight block truncate">
+                  {isStudent ? 'Student Portal' : 'Admin Console'}
+                </span>
+                <span className="text-[10px] block text-emerald-400 font-bold uppercase tracking-widest">
+                  {isStudent ? 'Learner Workspace' : 'LMS Management'}
+                </span>
               </div>
             )}
           </div>

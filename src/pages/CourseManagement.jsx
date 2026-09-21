@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCourses } from '../context/CourseContext';
+import { useEnrollments } from '../context/EnrollmentContext';
+import { useProgress } from '../context/ProgressContext';
 import Sidebar from '../components/Sidebar';
 import CourseCard from '../components/CourseCard';
 import CourseDetailsModal from '../components/CourseDetailsModal';
@@ -17,10 +19,15 @@ import {
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function CourseManagement() {
   const { user } = useAuth();
+  const isStudent = user?.role?.toLowerCase() === 'student';
+
   const { courses, loading, error, addCourse, updateCourse, deleteCourse, refreshCourses } = useCourses();
+  const { enrollments, enrollStudent, isStudentEnrolled } = useEnrollments();
+  const { createProgressRecord } = useProgress();
   
   // Layout state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,6 +49,9 @@ export default function CourseManagement() {
   const [courseToEdit, setCourseToEdit] = useState(null);
   const [courseToDelete, setCourseToDelete] = useState(null);
 
+  const studentId = user?.id || 'std-api-1';
+  const studentName = user?.name || 'Terry Medhurst';
+
   // Filter & Sort Logic
   const filteredAndSortedCourses = useMemo(() => {
     return courses
@@ -56,9 +66,9 @@ export default function CourseManagement() {
       .sort((a, b) => {
         if (sortBy === 'name-asc') return a.title.localeCompare(b.title);
         if (sortBy === 'name-desc') return b.title.localeCompare(a.title);
-        if (sortBy === 'price-low') return Number(a.price) - Number(b.price);
-        if (sortBy === 'price-high') return Number(b.price) - Number(a.price);
-        if (sortBy === 'rating') return Number(b.rating) - Number(a.rating);
+        if (sortBy === 'price-low') return a.price - b.price;
+        if (sortBy === 'price-high') return b.price - a.price;
+        if (sortBy === 'rating-high') return b.rating - a.rating;
         return 0;
       });
   }, [courses, searchQuery, selectedCategory, selectedLevel, sortBy]);
@@ -70,17 +80,26 @@ export default function CourseManagement() {
     return filteredAndSortedCourses.slice(startIdx, startIdx + itemsPerPage);
   }, [filteredAndSortedCourses, currentPage, itemsPerPage]);
 
-  // CRUD Handlers consuming CourseContext
-  const handleCreateOrUpdateCourse = (formData, id) => {
-    if (id) {
-      updateCourse(id, formData);
-    } else {
-      addCourse(formData);
-    }
-  };
+  // Student Self-Enrollment Action
+  const handleStudentSelfEnroll = (course) => {
+    try {
+      enrollStudent({
+        studentId: studentId,
+        studentName: studentName,
+        studentEmail: user?.email || 'student@lms.com',
+        courseId: course.id,
+        courseTitle: course.title,
+        category: course.category,
+        instructor: course.instructor,
+        price: course.price,
+        enrollmentDate: new Date().toISOString().split('T')[0]
+      });
 
-  const handleConfirmDelete = (id) => {
-    deleteCourse(id);
+      createProgressRecord(studentId, studentName, course.id, course.title, 15);
+      toast.success(`Successfully enrolled in "${course.title}"! 🎉`);
+    } catch (err) {
+      toast.error(err.message || 'Enrollment failed');
+    }
   };
 
   return (
@@ -94,7 +113,7 @@ export default function CourseManagement() {
         setIsCollapsed={setIsSidebarCollapsed}
       />
 
-      {/* Main Content View Area */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         
         {/* Header Bar */}
@@ -108,27 +127,41 @@ export default function CourseManagement() {
             </button>
             <div>
               <h1 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-                Course Management System
+                {isStudent ? 'Course Catalog & Self-Enrollment' : 'Course Catalog Management'}
               </h1>
               <p className="text-xs text-emerald-200/60 font-semibold hidden sm:block">
-                Global Course Context, MockAPI integration & CRUD controls
+                {isStudent 
+                  ? 'Module 3: Explore active courses and enroll in real-time' 
+                  : 'Module 3: Manage courses, categories, pricing, levels & catalog records'}
               </p>
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              setCourseToEdit(null);
-              setIsFormModalOpen(true);
-            }}
-            className="px-4 py-2 text-xs font-black emerald-btn rounded-xl shadow-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Add Course</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={refreshCourses}
+              className="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 transition cursor-pointer"
+              title="Refresh Course Catalog"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+
+            {!isStudent && (
+              <button
+                onClick={() => {
+                  setCourseToEdit(null);
+                  setIsFormModalOpen(true);
+                }}
+                className="px-4 py-2 text-xs font-black emerald-btn rounded-xl shadow-lg transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Create Course</span>
+              </button>
+            )}
+          </div>
         </header>
 
-        {/* Course Management Body */}
+        {/* Page Content Body */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
           <div className="max-w-7xl mx-auto space-y-6">
             
@@ -179,24 +212,24 @@ export default function CourseManagement() {
                   </select>
                 </div>
 
-                {/* Sorting Selector */}
+                {/* Sort Option */}
                 <div className="relative">
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="w-full px-3.5 py-2.5 teal-input rounded-xl text-xs font-semibold bg-[#061923]"
                   >
-                    <option value="name-asc">Sort: Course Name (A-Z)</option>
-                    <option value="name-desc">Sort: Course Name (Z-A)</option>
+                    <option value="name-asc">Sort: Title (A-Z)</option>
+                    <option value="name-desc">Sort: Title (Z-A)</option>
                     <option value="price-low">Sort: Price (Low to High)</option>
                     <option value="price-high">Sort: Price (High to Low)</option>
-                    <option value="rating">Sort: Rating (Highest)</option>
+                    <option value="rating-high">Sort: Top Rated</option>
                   </select>
                 </div>
 
               </div>
 
-              {/* Active Filter Counter */}
+              {/* Counter & Active Filter Reset */}
               <div className="flex items-center justify-between text-xs text-emerald-200/70 pt-2 border-t border-emerald-500/10">
                 <span className="font-semibold">
                   Showing <strong className="text-white">{filteredAndSortedCourses.length}</strong> course(s)
@@ -216,45 +249,40 @@ export default function CourseManagement() {
               </div>
             </div>
 
-            {/* Loading / Error / Card Grid */}
+            {/* Courses Cards Grid / Loading / Empty States */}
             {loading ? (
               <SkeletonLoader />
-            ) : error ? (
-              <div className="teal-glass-card p-8 rounded-3xl text-center space-y-4">
-                <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
-                <p className="text-sm font-bold text-white">{error}</p>
-                <button
-                  onClick={refreshCourses}
-                  className="px-4 py-2 text-xs font-black emerald-btn rounded-xl shadow-md transition inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <RefreshCw className="w-4 h-4" /> Retry Loading Courses
-                </button>
-              </div>
-            ) : paginatedCourses.length === 0 ? (
+            ) : filteredAndSortedCourses.length === 0 ? (
               <EmptyState 
                 title="No Courses Found" 
-                message="Try adjusting your search query or filters." 
+                message="Try resetting your filters or search keywords to view available courses." 
                 onAction={() => {
                   setSearchQuery('');
                   setSelectedCategory('All');
                   setSelectedLevel('All');
                 }}
-                actionLabel="Reset Filters"
+                actionLabel="Reset Search Filters"
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {paginatedCourses.map((course) => (
-                  <CourseCard 
-                    key={course.id}
-                    course={course}
-                    onViewDetails={(c) => setSelectedCourseForDetails(c)}
-                    onEdit={(c) => {
-                      setCourseToEdit(c);
-                      setIsFormModalOpen(true);
-                    }}
-                    onDelete={(c) => setCourseToDelete(c)}
-                  />
-                ))}
+                {paginatedCourses.map((course) => {
+                  const enrolled = isStudentEnrolled(studentId, course.id);
+                  return (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      isStudent={isStudent}
+                      isEnrolled={enrolled}
+                      onViewDetails={(c) => setSelectedCourseForDetails(c)}
+                      onEdit={(c) => {
+                        setCourseToEdit(c);
+                        setIsFormModalOpen(true);
+                      }}
+                      onDelete={(c) => setCourseToDelete(c)}
+                      onEnroll={handleStudentSelfEnroll}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -307,24 +335,38 @@ export default function CourseManagement() {
       </div>
 
       {/* Modals */}
-      <CourseDetailsModal 
+      <CourseDetailsModal
+        isOpen={!!selectedCourseForDetails}
         course={selectedCourseForDetails}
         onClose={() => setSelectedCourseForDetails(null)}
       />
 
-      <CourseFormModal 
-        isOpen={isFormModalOpen}
-        courseToEdit={courseToEdit}
-        onClose={() => setIsFormModalOpen(false)}
-        onSubmitCourse={handleCreateOrUpdateCourse}
-      />
+      {!isStudent && (
+        <>
+          <CourseFormModal
+            isOpen={isFormModalOpen}
+            courseToEdit={courseToEdit}
+            onClose={() => {
+              setIsFormModalOpen(false);
+              setCourseToEdit(null);
+            }}
+            onSubmitCourse={(data) => {
+              if (courseToEdit) {
+                updateCourse(courseToEdit.id, data);
+              } else {
+                addCourse(data);
+              }
+            }}
+          />
 
-      <DeleteConfirmModal 
-        isOpen={!!courseToDelete}
-        course={courseToDelete}
-        onClose={() => setCourseToDelete(null)}
-        onConfirmDelete={handleConfirmDelete}
-      />
+          <DeleteConfirmModal
+            isOpen={!!courseToDelete}
+            course={courseToDelete}
+            onClose={() => setCourseToDelete(null)}
+            onConfirmDelete={(id) => deleteCourse(id)}
+          />
+        </>
+      )}
 
     </div>
   );

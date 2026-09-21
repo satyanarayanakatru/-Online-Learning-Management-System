@@ -85,6 +85,13 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
+  const switchRole = (newRole) => {
+    if (!user) return;
+    const updatedUser = { ...user, role: newRole };
+    setUser(updatedUser);
+    setStoredCurrentUser(updatedUser);
+  };
+
   const logout = () => {
     setUser(null);
     setStoredCurrentUser(null);
@@ -97,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     resetPassword,
+    switchRole,
     logout
   };
 

@@ -1,7 +1,15 @@
 import React from 'react';
-import { Star, Clock, UserCheck, Eye, Edit3, Trash2, Tag, Layers } from 'lucide-react';
+import { Star, Clock, UserCheck, Eye, Edit3, Trash2, CheckCircle, PlusCircle } from 'lucide-react';
 
-export default function CourseCard({ course, onViewDetails, onEdit, onDelete }) {
+export default function CourseCard({ 
+  course, 
+  onViewDetails, 
+  onEdit, 
+  onDelete, 
+  isStudent = false, 
+  isEnrolled = false, 
+  onEnroll 
+}) {
   const getLevelColor = (level) => {
     switch (level) {
       case 'Beginner':
@@ -71,29 +79,56 @@ export default function CourseCard({ course, onViewDetails, onEdit, onDelete }) 
             </span>
           </div>
 
-          <div className="flex items-center space-x-1.5">
-            <button
-              onClick={() => onViewDetails(course)}
-              className="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition cursor-pointer"
-              title="View Course Details"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onEdit(course)}
-              className="p-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition cursor-pointer"
-              title="Edit Course"
-            >
-              <Edit3 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDelete(course)}
-              className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition cursor-pointer"
-              title="Delete Course"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
+          {isStudent ? (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => onViewDetails(course)}
+                className="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition cursor-pointer"
+                title="View Course Details"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+
+              {isEnrolled ? (
+                <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-black flex items-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> Enrolled
+                </span>
+              ) : (
+                <button
+                  onClick={() => onEnroll(course)}
+                  className="px-3.5 py-1.5 emerald-btn rounded-xl text-xs font-black shadow-md flex items-center gap-1.5 cursor-pointer"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>Enroll Now</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1.5">
+              <button
+                onClick={() => onViewDetails(course)}
+                className="p-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition cursor-pointer"
+                title="View Course Details"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onEdit(course)}
+                className="p-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition cursor-pointer"
+                title="Edit Course"
+              >
+                <Edit3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onDelete(course)}
+                className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition cursor-pointer"
+                title="Delete Course"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
         </div>
 
       </div>
